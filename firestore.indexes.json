@@ -1,0 +1,68 @@
+{
+    "indexes": [
+      {
+        "collectionGroup": "rol",
+        "queryScope": "COLLECTION",
+        "fields": [
+          { "fieldPath": "estado", "order": "ASCENDING" },
+          { "fieldPath": "rol", "order": "ASCENDING" }
+        ]
+      },
+      {
+        "collectionGroup": "usuario",
+        "queryScope": "COLLECTION",
+        "fields": [
+          { "fieldPath": "estado", "order": "ASCENDING" },
+          { "fieldPath": "usuario", "order": "ASCENDING" }
+        ]
+      },
+      {
+        "collectionGroup": "servicioRol",
+        "queryScope": "COLLECTION",
+        "fields": [
+          { "fieldPath": "estado", "order": "ASCENDING" },
+          { "fieldPath": "rol", "order": "ASCENDING" }
+        ]
+      },
+      {
+        "collectionGroup": "puerto",
+        "queryScope": "COLLECTION",
+        "fields": [
+          { "fieldPath": "nombre", "order": "ASCENDING" },
+          { "fieldPath": "estado", "order": "ASCENDING" }
+        ]
+      },
+      {
+        "collectionGroup": "importacionEnc",
+        "queryScope": "COLLECTION",
+        "fields": [
+          { "fieldPath": "bl", "order": "ASCENDING" },
+          { "fieldPath": "estado", "order": "ASCENDING" }
+        ]
+      },
+      {
+        "collectionGroup": "importacionDet",
+        "queryScope": "COLLECTION",
+        "fields": [
+          { "fieldPath": "bl", "order": "ASCENDING" },
+          { "fieldPath": "estado", "order": "ASCENDING" }
+        ]
+      },
+      {
+        "collectionGroup": "sucursal",
+        "queryScope": "COLLECTION",
+        "fields": [
+          { "fieldPath": "nombre", "order": "ASCENDING" },
+          { "fieldPath": "estado", "order": "ASCENDING" }
+        ]
+      },
+      {
+        "collectionGroup": "despacho",
+        "queryScope": "COLLECTION",
+        "fields": [
+          { "fieldPath": "bl", "order": "ASCENDING" },
+          { "fieldPath": "estado", "order": "ASCENDING" }
+        ]
+      }
+    ]
+  }
