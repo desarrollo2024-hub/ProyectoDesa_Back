@@ -94,7 +94,7 @@ router.meta = {
   Descripcion: "Administración de los articulos de importaciones",
   Ruta: "/menu/DetalleImportacion",
   Icono: "bi bi-list-check",
-  Orden: "[2,4]",
+  Orden: "[2,3]",
 };
 
 module.exports = router;

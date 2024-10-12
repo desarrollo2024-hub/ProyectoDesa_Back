@@ -1,6 +1,7 @@
 const { db } = require("../../connectors/dbconnect");
 const { procesaCRUD, formatDateDB } = require("../../helpers/procesaCRUD");
 const moment = require("moment");
+const { registraFlujo } = require("../flujo/flujo");
 
 const collection = "importacionDet";
 const campoCollection = "bl";
@@ -11,6 +12,7 @@ exports.nuevoRegistro = async (req, res) => {
   try {
     const jsonInsert = {
       bl: req.body.bl,
+      cliente: req.usuario.usuario,
       //detalle: req.body.valoresTabla || [],
       fechaCreacion: moment(),
       usuarioCrea: req.usuario.usuario,
@@ -40,14 +42,20 @@ exports.consultarRegistros = async (req, res) => {
     let dbConsulta = [{}];
     let filas = [];
     let columnas = [];
+    let nombreCompleto = "";
 
     if (filtro) {
       filtro = filtro ? filtro.split("") : [];
 
-      dbConsulta = await db
-        .collection(collection)
-        .where("estado", "in", filtro)
-        .get();
+      let query = db.collection(collection);
+      query = query.where("estado", "in", filtro);
+
+      if (req.usuario.tipo === "Cliente") {
+        nombreCompleto = `${req.usuario.nombre} ${req.usuario.apellidos}`;
+        query = query.where("cliente", "==", nombreCompleto);
+      }
+
+      dbConsulta = await query.get();
 
       //Retorna el nuevo json que se pintara en la tabla
       filas = dbConsulta?.docs.map((data) => {
@@ -55,6 +63,7 @@ exports.consultarRegistros = async (req, res) => {
         let fila = {
           ID: data.id,
           BL_IMPORTACION: element.bl || "",
+          CLIENTE_ASIGNADO: element.cliente || "",
           USUARIO_CREACION: element.usuarioCrea || "",
           FECHA_CREACION: formatDateDB(element.fechaCreacion, formatDate),
           ESTADO:
@@ -95,6 +104,7 @@ exports.consultarRegistros = async (req, res) => {
       filas = [
         {
           BL_IMPORTACION: "",
+          CLIENTE_ASIGNADO: "",
         },
       ];
     }
@@ -120,18 +130,24 @@ exports.consultarRegistros = async (req, res) => {
     let dbImportaciones = [];
 
     // Obtener las importaciones finalizadas
-    const dbImportacionesFinSnapshot = await db
-      .collection("importacionEnc")
-      .where("estado", "==", "F")
-      .get();
+    let queryImpEnc = db.collection("importacionEnc");
+    queryImpEnc = queryImpEnc.where("estado", "==", "F");
+    if (req.usuario.tipo === "Cliente") {
+      queryImpEnc = queryImpEnc.where("cliente", "==", nombreCompleto);
+    }
+
+    const dbImportacionesFinSnapshot = await queryImpEnc.get();
 
     // Si no hay importaciones finalizadas, retornamos un array vacío
     if (!dbImportacionesFinSnapshot.empty) {
       // Obtener las importaciones pendientes
-      const dbImportacionesPendSnapshot = await db
-        .collection(collection)
-        .where("estado", "!=", "N")
-        .get();
+      let queryImpDet = db.collection(collection);
+      queryImpDet = queryImpDet.where("estado", "!=", "N");
+      if (req.usuario.tipo === "Cliente") {
+        queryImpDet = queryImpDet.where("cliente", "==", nombreCompleto);
+      }
+
+      const dbImportacionesPendSnapshot = await queryImpDet.get();
 
       // Crear un conjunto (Set) con todos los números "bl" de dbImportacionesPend
       const blPendientes = new Set();
@@ -430,6 +446,20 @@ exports.cambiarEtapa = async (req, res) => {
 
     //Eliminar Registro
     await dbFinaliza.update(jsonFinaliza);
+
+    await registraFlujo(
+      dbFinalizaData.bl,
+      `${req.usuario.nombre} ${req.usuario.apellidos}`,
+      "Productos Agregados",
+      dbFinalizaData.cliente
+    );
+
+    await registraFlujo(
+      dbFinalizaData.bl,
+      `${req.usuario.nombre} ${req.usuario.apellidos}`,
+      "En espera de arribo",
+      dbFinalizaData.cliente
+    );
 
     return res.status(200).json({
       codigo: 200,

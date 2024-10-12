@@ -31,6 +31,7 @@ exports.nuevoRegistro = async (req, res) => {
       dpi: req.body.dpi,
       puesto: req.body.puesto,
       correo: req.body.correo.toLowerCase(),
+      tipo: req.body.tipo,
       fechaCreacion: moment(),
       usuarioCrea: req.usuario.usuario,
       estado: "A",
@@ -105,6 +106,7 @@ exports.consultarRegistros = async (req, res) => {
           DPI: element.dpi,
           PUESTO: element.puesto,
           CORREO: element.correo,
+          TIPO: element.tipo,
           CONECTADO: element.conectado == 1 ? "SI" : "NO",
           ULTIMA_SESIÓN: formatDateDB(element.fechaUltimaSesion, formatDate),
           USUARIO_CREACION: element.usuarioCrea,
@@ -145,6 +147,7 @@ exports.consultarRegistros = async (req, res) => {
           DPI: "",
           PUESTO: "",
           CORREO: "",
+          TIPO: "",
         },
       ];
     }
@@ -172,6 +175,11 @@ exports.consultarRegistros = async (req, res) => {
       { value: "B", descripcion: "Bloqueado" },
     ];
 
+    const tipo = [
+      { value: "Interno", descripcion: "Interno" },
+      { value: "Cliente", descripcion: "Cliente" },
+    ];
+
     //Roles y estados
 
     const dbRolesSnap = await db
@@ -188,6 +196,7 @@ exports.consultarRegistros = async (req, res) => {
       rol: dbRoles || [],
       conectado,
       estado,
+      tipo,
     };
 
     const CRUD = await procesaCRUD(CRUDs);
@@ -234,6 +243,7 @@ exports.modificarRegistro = async (req, res) => {
       dpi: req.body.dpi,
       puesto: req.body.puesto,
       correo: req.body.correo.toLowerCase(),
+      tipo: req.body.tipo,
       conectado: req.body.conectado,
       estado: req.body.estado,
       fechaModificacion: moment(),
@@ -332,6 +342,7 @@ exports.consultaRegistroID = async (req, res) => {
       dpi: dbConsultaIDData.dpi,
       puesto: dbConsultaIDData.puesto,
       correo: dbConsultaIDData.correo,
+      tipo: dbConsultaIDData.tipo,
       conectado: dbConsultaIDData.conectado || 0,
       estado: dbConsultaIDData.estado,
     };
@@ -520,6 +531,24 @@ const CRUDs = [
     tamanio: 100,
     obligatorio: true,
     placeholder: "Ingrese Correo",
+    className: "col-md-9",
+    CRUD: {
+      create: {},
+      read: {},
+      update: {},
+    },
+  },
+  {
+    elemento: "select",
+    type: "select",
+    name: "tipo",
+    id_input: "tipo",
+    classNameLabel: "col-sm-3 col-form-label",
+    disabled: false,
+    titulo: "Tipo Usuario",
+    tamanio: 10,
+    obligatorio: true,
+    placeholder: "Seleccione tipo",
     className: "col-md-9",
     CRUD: {
       create: {},

@@ -113,7 +113,7 @@ exports.consultarRegistros = async (req, res) => {
       });
 
     //Retornar filas vacias para armar las columnas
-    if (dbConsulta.empty) {
+    if (dbConsulta.empty || dbConsulta.length == 0) {
       filas = [
         {
           ITEM_CODE: "",
@@ -138,7 +138,7 @@ exports.consultarRegistros = async (req, res) => {
         size: 20,
       }));
 
-    if (dbConsulta.empty) {
+    if (dbConsulta.empty || dbConsulta.length == 0) {
       filas = [];
     }
 

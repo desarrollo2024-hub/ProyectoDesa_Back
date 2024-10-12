@@ -63,6 +63,22 @@
           { "fieldPath": "bl", "order": "ASCENDING" },
           { "fieldPath": "estado", "order": "ASCENDING" }
         ]
+      },
+      {
+        "collectionGroup": "importacionDet",
+        "queryScope": "COLLECTION",
+        "fields": [
+          { "fieldPath": "cliente", "order": "ASCENDING" },
+          { "fieldPath": "estado", "order": "ASCENDING" }
+        ]
+      },
+      {
+        "collectionGroup": "importacionFlujo",
+        "queryScope": "COLLECTION",
+        "fields": [
+          { "fieldPath": "cliente", "order": "ASCENDING" },
+          { "fieldPath": "fecha", "order": "DESCENDING" }
+        ]
       }
     ]
   }

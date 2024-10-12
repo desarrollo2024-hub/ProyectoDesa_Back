@@ -2,6 +2,7 @@ const { db } = require("../../connectors/dbconnect");
 const { procesaCRUD, formatDateDB } = require("../../helpers/procesaCRUD");
 const moment = require("moment");
 const admin = require("firebase-admin");
+const { registraFlujo } = require("../flujo/flujo");
 
 const collection = "despacho";
 const campoCollection = "bl";
@@ -12,6 +13,7 @@ exports.nuevoRegistro = async (req, res) => {
   try {
     const jsonInsert = {
       bl: req.body.bl,
+      cliente: req.body.cliente,
       //detalle: req.body.valoresTabla || [],
       fechaCreacion: moment(),
       usuarioCrea: req.usuario.usuario,
@@ -19,6 +21,13 @@ exports.nuevoRegistro = async (req, res) => {
     };
 
     const dbInserta = await db.collection(collection).add(jsonInsert);
+    await registraFlujo(
+      jsonInsert.bl,
+      `${req.usuario.nombre} ${req.usuario.apellidos}`,
+      "Inicio de despacho",
+      jsonInsert.cliente
+    );
+
     return res.status(200).json({
       codigo: 200,
       mensaje: `Registro ${jsonInsert[campoCollection]} creado exitosamente`,
@@ -56,6 +65,7 @@ exports.consultarRegistros = async (req, res) => {
         let fila = {
           ID: data.id,
           BL_IMPORTACION: element.bl || "",
+          CLIENTE_ASIGNADO: element.cliente,
           USUARIO_CREACION: element.usuarioCrea || "",
           FECHA_CREACION: formatDateDB(element.fechaCreacion, formatDate),
           ESTADO:
@@ -96,6 +106,7 @@ exports.consultarRegistros = async (req, res) => {
       filas = [
         {
           BL_IMPORTACION: "",
+          CLIENTE_ASIGNADO: "",
         },
       ];
     }
@@ -144,6 +155,7 @@ exports.consultarRegistros = async (req, res) => {
       for (const doc of dbImportacionesFinSnapshot.docs) {
         const data = doc.data();
         const bl = data.bl;
+        const cliente = data.cliente;
 
         // Excluir si está en pendientes
         if (blPendientes.has(bl)) continue;
@@ -181,6 +193,7 @@ exports.consultarRegistros = async (req, res) => {
             id: bl,
             descripcion: bl,
             ctnsPendientes: totalCTNSImportacion - totalCTNSDespachos,
+            cliente: cliente,
           });
         }
       }
@@ -550,6 +563,12 @@ exports.cambiarEtapa = async (req, res) => {
 
     //Eliminar Registro
     await dbFinaliza.update(jsonFinaliza);
+    await registraFlujo(
+      dbFinalizaData.bl,
+      `${req.usuario.nombre} ${req.usuario.apellidos}`,
+      "Producto enviado a bodega",
+      dbFinaliza.cliente
+    );
 
     return res.status(200).json({
       codigo: 200,

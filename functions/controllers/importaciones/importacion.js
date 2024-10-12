@@ -1,6 +1,7 @@
 const { db } = require("../../connectors/dbconnect");
 const { procesaCRUD, formatDateDB } = require("../../helpers/procesaCRUD");
 const moment = require("moment");
+const { registraFlujo } = require("../flujo/flujo");
 
 const collection = "importacionEnc";
 const campoCollection = "bl";
@@ -19,6 +20,7 @@ exports.nuevoRegistro = async (req, res) => {
       barco: req.body.barco,
       puertoOrigen: req.body.puertoOrigen,
       puertoDestino: req.body.puertoDestino,
+      cliente: req.body.cliente,
       fechaArribo: moment(req.body.fechaArribo).startOf("day").toDate(),
       fechaCreacion: moment(),
       usuarioCrea: req.usuario.usuario,
@@ -26,6 +28,13 @@ exports.nuevoRegistro = async (req, res) => {
     };
 
     const dbInserta = await db.collection(collection).add(jsonInsert);
+
+    await registraFlujo(
+      `${jsonInsert.bl} - ${jsonInsert.embarcador}`,
+      `${req.usuario.nombre} ${req.usuario.apellidos}`,
+      "Inicio de Importación",
+      jsonInsert.cliente
+    );
     return res.status(200).json({
       codigo: 200,
       mensaje: `Registro ${jsonInsert[campoCollection]} creado exitosamente`,
@@ -70,6 +79,7 @@ exports.consultarRegistros = async (req, res) => {
           BARCO: element.barco || "",
           PUERTO_ORIGEN: element.puertoOrigen || "",
           PUETO_DESTINO: element.puertoDestino || "",
+          CLIENTE_ASIGNADO: element.cliente || "",
           FECHA_ARRIBO: formatDateDB(element.fechaSalida, formatDateConsul),
           USUARIO_CREACION: element.usuarioCrea || "",
           FECHA_CREACION: formatDateDB(element.fechaCreacion, formatDate),
@@ -116,6 +126,7 @@ exports.consultarRegistros = async (req, res) => {
           BARCO: "",
           PUERTO_ORIGEN: "",
           PUETO_DESTINO: "",
+          CLIENTE_ASIGNADO: "",
           FECHA_ARRIBO: "",
         },
       ];
@@ -135,22 +146,32 @@ exports.consultarRegistros = async (req, res) => {
 
     const CRUD = await procesaCRUD(CRUDs);
 
-    //SECCIÓN DE SELECTS
-    let valSelect = {};
-
     const dbPuertosSnap = await db
       .collection("puerto")
       .where("estado", "!=", "N")
       .get();
 
     const dbPuertos = dbPuertosSnap.docs.map((doc) => ({
-      id: doc.data().nombre,
-      nombre: doc.data().nombre,
+      value: doc.data().nombre,
+      descripcion: doc.data().nombre,
+    }));
+
+    const dbUsuarioSnap = await db
+      .collection("usuario")
+      .where("estado", "==", "A")
+      .where("tipo", "==", "Cliente")
+      .get();
+
+    const dbUsuario = dbUsuarioSnap.docs.map((doc) => ({
+      value: `${doc.data().nombre} ${doc.data().apellidos}`,
+      descripcion: `${doc.data().nombre} ${doc.data().apellidos}`,
     }));
 
     // Obtener condiciones
-    valSelect = {
-      Puerto: dbPuertos || [],
+    let valoresSelectBox = {
+      puertoOrigen: dbPuertos || [],
+      puertoDestino: dbPuertos || [],
+      cliente: dbUsuario || [],
     };
 
     const json = {
@@ -159,7 +180,7 @@ exports.consultarRegistros = async (req, res) => {
         columnas: columnas,
       },
       CRUD,
-      valSelect,
+      valoresSelectBox,
     };
 
     return res.status(200).json({
@@ -206,6 +227,7 @@ exports.modificarRegistro = async (req, res) => {
       barco: req.body.barco,
       puertoOrigen: req.body.puertoOrigen,
       puertoDestino: req.body.puertoDestino,
+      cliente: req.body.cliente,
       fechaArribo: moment(req.body.fechaArribo).startOf("day").toDate(),
       fechaModificacion: moment(),
     };
@@ -222,6 +244,14 @@ exports.modificarRegistro = async (req, res) => {
     );
 
     await dbModifica.update(jsonUpdate);
+
+    await registraFlujo(
+      dbModificaData.bl,
+      `${req.usuario.nombre} ${req.usuario.apellidos}`,
+      "Actualización de Importación",
+      jsonUpdate.cliente
+    );
+
     return res.status(200).json({
       codigo: 200,
       mensaje: `Registro ${dbModificaData[campoCollection]} modificado exitosamente`,
@@ -313,6 +343,7 @@ exports.consultarRegPorID = async (req, res) => {
       barco: dbConsultaIDData.barco,
       puertoOrigen: dbConsultaIDData.puertoOrigen,
       puertoDestino: dbConsultaIDData.puertoDestino,
+      cliente: dbConsultaIDData.cliente,
       fechaArribo: formatDateDB(dbConsultaIDData.fechaArribo, formatDateConsul),
     };
 
@@ -362,6 +393,26 @@ exports.cambiarEtapa = async (req, res) => {
 
     //Eliminar Registro
     await dbFinaliza.update(jsonFinaliza);
+
+    //Inserta información en el detalle
+    const jsonInsertDet = {
+      bl: `${dbFinalizaData.bl} - ${dbFinalizaData.embarcador}`,
+      cliente: dbFinalizaData.cliente,
+      fechaCreacion: moment(),
+      usuarioCrea: req.usuario.usuario,
+      estado: "A",
+    };
+
+    const dbInsertaDet = await db
+      .collection("importacionDet")
+      .add(jsonInsertDet);
+
+    await registraFlujo(
+      jsonInsertDet.bl,
+      `${req.usuario.nombre} ${req.usuario.apellidos}`,
+      "Ingreso de Productos",
+      jsonInsertDet.cliente
+    );
 
     return res.status(200).json({
       codigo: 200,
@@ -535,6 +586,24 @@ const CRUDs = [
     obligatorio: true,
     placeholder: "Ingrese la fecha arribo",
     className: "col-md-3",
+    CRUD: {
+      create: {},
+      read: { disabled: true },
+      update: {},
+    },
+  },
+  {
+    elemento: "select",
+    type: "select",
+    name: "cliente",
+    id_input: "cliente",
+    classNameLabel: "col-sm-2 col-form-label",
+    disabled: false,
+    titulo: "Cliente",
+    tamanio: 100,
+    obligatorio: true,
+    placeholder: "Seleccione Cliente",
+    className: "col-md-4",
     CRUD: {
       create: {},
       read: { disabled: true },

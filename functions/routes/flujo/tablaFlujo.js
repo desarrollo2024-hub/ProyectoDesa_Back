@@ -1,8 +1,7 @@
 const { Router } = require("express");
+const { check } = require("express-validator");
 const { validarJWT } = require("../../middlewares");
-const {
-  consultarRegistros,
-} = require("../../controllers/importaciones/graficaImpEnc");
+const { consultarRegistros } = require("../../controllers/flujo/tablaFlujo");
 
 const router = Router();
 
@@ -16,13 +15,13 @@ router.use((req, res, next) => {
 router.get("/filtro/:filtro", [validarJWT], consultarRegistros);
 
 router.meta = {
-  Modulo: "[Importaciones]",
-  IconoModulo: "[bi bi-truck]",
-  Titulo: "Gráficas Importación",
-  Descripcion: "Muestra de gráficas",
-  Ruta: "/menu/GráficaEncImp",
-  Icono: "bi bi-bar-chart-fill",
-  Orden: "[2,4]",
+  Modulo: "[Seguimiento]",
+  IconoModulo: "[bi bi-bar-chart-steps]",
+  Titulo: "Seguimiento",
+  Descripcion: "Seguimiento de Importaciones",
+  Ruta: "/menu/Seguimiento",
+  Icono: "bi bi-bar-chart-steps",
+  Orden: "[5]",
 };
 
 module.exports = router;
