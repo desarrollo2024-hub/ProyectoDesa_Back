@@ -4,6 +4,7 @@ const moment = require("moment");
 const collection = "importacionFlujo";
 
 const registraFlujo = async (bl, usuario, etapa, cliente) => {
+  console.log("bl, usuario, etapa, cliente", bl, usuario, etapa, cliente);
   try {
     const jsonInsert = {
       bl,

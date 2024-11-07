@@ -4,7 +4,7 @@ const nuevoUsuario = (nombre = "", usuario = "", contrasena = "") => {
         <table class="form-control" style="width: 100%; margin: 0 auto; padding-left: 10px; padding-right: 10px;" border="0" cellpadding="0" cellspacing="0" >
             <tr>  
                 <td style=" text-align: center; ">
-                    <img src="https://i.postimg.cc/tJFvP1zv/lotus-flores-y-nombre.png" alt="GRUPO"  style="width:20%; height:auto;">
+                    <img src="https://i.postimg.cc/wTh295Wm/Nuevo-Logo-Barco.png" alt="GRUPO"  style="width:20%; height:auto;">
                 </td>
             </tr>
             <tr bgcolor="#fff">
@@ -41,8 +41,7 @@ const nuevoUsuario = (nombre = "", usuario = "", contrasena = "") => {
             <tr bgcolor="#fff">
                 <td style="text-align:justify">
                     <br/>
-                    <label style="color: #000">Si tienes alguna pregunta o necesitas ayuda, no dudes en contactarnos a tu jefe inmediato.<br/>
-                    O  comunicarte al correo: soporte@grupolotus.com.gt</label>              
+                    <label style="color: #000">Si tienes alguna pregunta o necesitas ayuda, no dudes en contactarnos a tu jefe inmediato.</label>              
                 </td>
         </table>
     </div>
@@ -55,7 +54,7 @@ const reseteoClave = (nombre = "", contrasena = "") => {
         <table class="form-control" style="width: 100%; margin: 0 auto; padding-left: 10px; padding-right: 10px;" border="0" cellpadding="0" cellspacing="0" >
             <tr>  
                 <td style=" text-align: center; ">
-                    <img src="https://i.postimg.cc/tJFvP1zv/lotus-flores-y-nombre.png" alt="GRUPO"  style="width:20%; height:auto;">
+                    <img src="https://i.postimg.cc/wTh295Wm/Nuevo-Logo-Barco.png" alt="GRUPO"  style="width:20%; height:auto;">
                 </td>
             </tr>
             <tr bgcolor="#fff">
@@ -92,8 +91,7 @@ const reseteoClave = (nombre = "", contrasena = "") => {
             <tr bgcolor="#fff">
                 <td style="text-align:justify">
                     <br/>
-                    <label style="color: #000">Si no fuiste tu quien solicito un cambio de contraseña, porfavor contacta a tu jefe inmediato.<br/>
-                    Cualquier duda o comentario comunicarte al correo: soporte@grupolotus.com.gt</label>              
+                    <label style="color: #000">Si no fuiste tu quien solicito un cambio de contraseña, porfavor contacta a tu jefe inmediato.</label>              
                 </td>
         </table>
     </div>

@@ -567,7 +567,7 @@ exports.cambiarEtapa = async (req, res) => {
       dbFinalizaData.bl,
       `${req.usuario.nombre} ${req.usuario.apellidos}`,
       "Producto enviado a bodega",
-      dbFinaliza.cliente
+      dbFinalizaData.cliente
     );
 
     return res.status(200).json({
